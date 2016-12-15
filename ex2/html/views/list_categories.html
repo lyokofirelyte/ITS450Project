@@ -1,0 +1,91 @@
+<?php // This page is included by shop.php.
+// This page displays the individual categories.
+// This page will make use of the query result $r.
+// The query returns an array of: id, category, description, and image.
+?>
+<style>
+	.game_div {
+		padding: 10px;
+		width: 100%;
+		height: 100%;
+	}
+	
+	.game_cover {
+		height: 25%;
+		width: 25%;
+	}
+	
+	.game_desc {
+		display: inline;
+	}
+	
+	.button {
+		margin-top: 140px;
+	}
+</style>
+<!-- box begin -->
+<div class="box alt">
+ 	<div class="left-top-corner">
+    	<div class="right-top-corner">
+       	<div class="border-top"></div>
+       </div>
+    </div>
+    <div class="border-left">
+    	<div class="border-right">
+       	<div class="inner">
+       	<form action="<?php echo $_SERVER['PHP_SELF']?>" method="POST">
+       		Search for a Game
+       		<input type="text" name="game_search">
+       		<input type="submit" class="button">
+       	</form>
+       	<?php
+       		function checkRemoteFile($url)
+{
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL,$url);
+    // don't download content
+    curl_setopt($ch, CURLOPT_NOBODY, 1);
+    curl_setopt($ch, CURLOPT_FAILONERROR, 1);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    return curl_exec($ch) !== FALSE;
+}
+       		if (isset($_POST["game_search"])){
+				$query = "SELECT * from general_coffees where category LIKE '%" . $_POST["game_search"] . "%'";
+				$result = mysqli_query($dbc, $query);
+				if (!$result){
+					echo(mysqli_error($dbc));
+				}
+       	?>
+<?php 
+	if (mysqli_num_rows($result) > 0){
+	$i = 0;
+	while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC)) { // Fetch each item.
+	$i++;
+	if ($i > 50){
+		break;
+	}
+	$url = "http://cdn.akamai.steamstatic.com/steam/apps/" . $row['description'] . "/header.jpg";
+	$image = checkRemoteFile($url) ? $url : "http://orig13.deviantart.net/a03e/f/2014/074/b/9/snes_steam_grid_view_banner_by_madude175-d7abloc.png";
+	// Print the item within some HTML:
+	echo '<div class="game_div">
+        		<div class="game_desc">' . $row['category'] . '</div><br /><br />
+                <img class="game_cover" alt="' . $row['category'] . '" src="' . $image . '"  />
+				Product ID: ' . $row['description'] . '<br /> <br /><br />
+<a href="/cart.php?sku=C' . $row['id'] . '&action=add" class="button">Add to Cart</a>
+		 </div><br />';
+	}
+	} else {
+		echo("No results!");
+	}
+
+}?> 
+          </div>
+       </div>
+    </div>
+    <div class="left-bot-corner">
+    	<div class="right-bot-corner">
+       	<div class="border-bot"></div>
+       </div>
+    </div>
+ </div>
+<!-- box end -->
